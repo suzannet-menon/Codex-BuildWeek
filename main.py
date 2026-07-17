@@ -34,7 +34,6 @@ def serve_frontend():
 def health():
     return {"status": "ok"}
 
-
 @app.post("/match", response_model=MatchResult)
 def match_text(request: MatchRequest):
     try:
