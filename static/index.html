@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Resume + Job Match Agent</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --surface2: #273449;
+        --border: #334155;
+        --accent: #6366f1;
+        --accent-light: #818cf8;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --radius: 12px;
+      }
+
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+      header h1 span {
+        color: var(--accent-light);
+      }
+      header p {
+        color: var(--muted);
+        margin-top: 8px;
+        font-size: 0.95rem;
+      }
+
+      /* Pipeline badges */
+      .pipeline {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+      .badge {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        color: var(--muted);
+      }
+
+      /* Form card */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+        margin-bottom: 24px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 24px;
+      }
+      .tab {
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .tab.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
+      .input-group {
+        margin-bottom: 18px;
+      }
+      label {
+        display: block;
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      textarea,
+      input[type="file"] {
+        width: 100%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.9rem;
+        padding: 12px;
+        font-family: inherit;
+        resize: vertical;
+        outline: none;
+        transition: border 0.2s;
+      }
+      textarea:focus {
+        border-color: var(--accent);
+      }
+      textarea {
+        min-height: 140px;
+      }
+
+      input[type="file"] {
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .btn:hover {
+        opacity: 0.88;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Loading */
+      .loader {
+        display: none;
+        text-align: center;
+        padding: 40px 0;
+      }
+      .loader.active {
+        display: block;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 16px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .loader-steps {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+
+      /* Results */
+      #results {
+        display: none;
+      }
+      #results.active {
+        display: block;
+      }
+
+      .score-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .score-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        text-align: center;
+      }
+      .score-card .label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .score-card .number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .score-card .sub {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .green {
+        color: var(--success);
+      }
+      .amber {
+        color: var(--warning);
+      }
+      .red {
+        color: var(--danger);
+      }
+      .indigo {
+        color: var(--accent-light);
+      }
+
+      /* Section */
+      .section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+
+      .reasoning {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+
+      /* Tags */
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+      .tag {
+        font-size: 0.78rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+      .tag.success {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+      }
+      .tag.warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+      }
+      .tag.danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+      }
+      .tag.purple {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--accent-light);
+      }
+      .tag.dark {
+        background: rgba(241, 245, 249, 0.08);
+        color: var(--text);
+      }
+
+      /* Suggestion cards */
+      .suggestion {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+      .suggestion.good {
+        border-left-color: var(--success);
+      }
+      .suggestion.vague {
+        border-left-color: var(--warning);
+      }
+      .suggestion.weak {
+        border-left-color: var(--warning);
+      }
+      .suggestion.hallucinated {
+        border-left-color: var(--danger);
+      }
+
+      .suggestion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .suggestion-section {
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+      .flag-badge {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .flag-good {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+      }
+      .flag-vague,
+      .flag-weak {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+      }
+      .flag-hallucinated {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+      }
+
+      .suggestion-text {
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: var(--text);
+      }
+      .suggestion-reason {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .suggestion-original {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+        text-decoration: line-through;
+      }
+
+      /* Download btn */
+      .download-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--success);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border: none;
+        margin-top: 8px;
+        transition: opacity 0.2s;
+      }
+      .download-btn:hover {
+        opacity: 0.88;
+      }
+
+      .divergence-banner {
+        display: none;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        border-left: 4px solid var(--warning);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: var(--text);
+      }
+      .divergence-banner.active {
+        display: block;
+      }
+      .divergence-banner strong {
+        color: var(--warning);
+      }
+
+      .eval-summary {
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+        color: var(--muted);
+        font-size: 0.875rem;
+        line-height: 1.6;
+      }
+
+      /* ATS Keywords */
+      .ats-gap-banner {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+        font-weight: 500;
+      }
+      .ats-keyword-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .ats-keyword-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .ats-keyword-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .ats-keyword-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text);
+      }
+      .ats-priority {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .ats-priority-high {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+      }
+      .ats-priority-medium {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+      }
+      .ats-priority-low {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--accent-light);
+      }
+      .ats-where {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .ats-example {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-style: italic;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 600px) {
+        .ats-keyword-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .score-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>AI Resume <span>+</span> Job Match Agent</h1>
+        <p>
+          Agentic analysis — score, gaps, ATS keywords, suggestions, embeddings,
+          and self-eval
+        </p>
+        <div class="pipeline">
+          <span class="badge">① LLM Match Score</span>
+          <span class="badge">② Gap Analysis</span>
+          <span class="badge">③ Suggestions</span>
+          <span class="badge">④ Semantic Embeddings</span>
+          <span class="badge">⑤ ATS Keywords</span>
+          <span class="badge">⑥ Self-Eval Judge</span>
+        </div>
+      </header>
+
+      <!-- Input form -->
+      <div class="card" id="formCard">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('text')">
+            Paste Resume
+          </button>
+          <button class="tab" onclick="switchTab('pdf')">Upload PDF</button>
+        </div>
+
+        <!-- Text tab -->
+        <div id="textTab">
+          <div class="input-group">
+            <label>Resume Text</label>
+            <textarea
+              id="resumeText"
+              placeholder="Paste your resume here..."
+            ></textarea>
+          </div>
+          <div class="input-group">
+            <label>Job Description</label>
+            <textarea
+              id="jobText"
+              placeholder="Paste the job description here..."
+            ></textarea>
+          </div>
+          <button class="btn" onclick="analyzeText()">Analyze Match →</button>
+        </div>
+
+        <!-- PDF tab -->
+        <div id="pdfTab" style="display: none">
+          <div class="input-group">
+            <label>Resume PDF</label>
+            <input type="file" id="resumePdf" accept=".pdf" />
+          </div>
+          <div class="input-group">
+            <label>Job Description</label>
+            <textarea
+              id="jobTextPdf"
+              placeholder="Paste the job description here..."
+            ></textarea>
+          </div>
+          <button class="btn" onclick="analyzePdf()">Analyze Match →</button>
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-steps" id="loaderStep">
+          Running 5-step agentic pipeline...
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results">
+        <!-- Score divergence warning -->
+        <div class="divergence-banner" id="divergenceBanner">
+          <strong>⚠️ ATS Vocabulary Gap Detected</strong><br />
+          Your LLM score (<span id="divLlm"></span>) is significantly higher
+          than your semantic similarity score (<span id="divSem"></span>). This
+          means you're a strong conceptual fit, but your resume uses different
+          words than the job description. ATS systems filter on vocabulary —
+          suggestions below have been tuned to fix this.
+        </div>
+
+        <!-- Score cards -->
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="label">LLM Match Score</div>
+            <div class="number" id="llmScore">—</div>
+            <div class="sub">out of 100</div>
+          </div>
+          <div class="score-card">
+            <div class="label">Semantic Similarity</div>
+            <div class="number" id="semScore">—</div>
+            <div class="sub">embedding cosine</div>
+          </div>
+          <div class="score-card">
+            <div class="label">Suggestion Quality</div>
+            <div class="number indigo" id="evalScore">—</div>
+            <div class="sub">self-eval / 10</div>
+          </div>
+        </div>
+
+        <!-- Match reasoning -->
+        <div class="card">
+          <div class="section-title">Match Reasoning</div>
+          <div class="reasoning" id="reasoning"></div>
+
+          <div class="section-title">Strong Matches</div>
+          <div class="tags" id="strongMatches"></div>
+
+          <div class="section-title">Partial Matches</div>
+          <div class="tags" id="weakMatches"></div>
+        </div>
+
+        <!-- Semantic -->
+        <div class="card">
+          <div class="section-title">Semantic Similarity</div>
+          <div class="reasoning" id="semInterpretation"></div>
+        </div>
+
+        <!-- Gaps -->
+        <div class="card">
+          <div class="section-title">Missing Skills</div>
+          <div class="tags" id="missingSkills"></div>
+
+          <div class="section-title">Missing ATS Keywords</div>
+          <div class="tags" id="missingKeywords"></div>
+
+          <div class="section-title">Priority Gaps (Fix First)</div>
+          <div class="tags" id="priorityGaps"></div>
+        </div>
+
+        <!-- ATS Keywords -->
+        <div class="card">
+          <div class="section-title">ATS Keyword Suggestions</div>
+          <div class="reasoning" id="atsRewriteAdvice"></div>
+          <div id="atsGapBanner" class="ats-gap-banner" style="display: none">
+            ⚠️ Significant ATS vocabulary gap detected — your resume concepts
+            are right but the wording does not match what ATS systems scan for.
+          </div>
+          <div class="ats-keyword-grid" id="atsKeywordsList"></div>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="card">
+          <div class="section-title">Resume Suggestions</div>
+          <div class="reasoning" id="summaryAdvice"></div>
+          <div id="suggestionsList"></div>
+        </div>
+
+        <!-- Eval -->
+        <div class="card">
+          <div class="section-title">Self-Eval Judge Summary</div>
+          <div class="eval-summary" id="evalSummary"></div>
+        </div>
+
+        <!-- Download -->
+        <div style="text-align: center; margin-bottom: 40px">
+          <button class="download-btn" id="downloadBtn">
+            ⬇ Download Full PDF Report
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let lastRequest = null;
+      let lastMode = "text";
+
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.getElementById("textTab").style.display =
+          tab === "text" ? "block" : "none";
+        document.getElementById("pdfTab").style.display =
+          tab === "pdf" ? "block" : "none";
+        event.target.classList.add("active");
+        lastMode = tab;
+      }
+
+      function setLoading(on) {
+        document.getElementById("loader").classList.toggle("active", on);
+        document
+          .getElementById("results")
+          .classList.toggle("active", !on && lastRequest);
+        document.getElementById("formCard").style.opacity = on ? "0.5" : "1";
+        document.querySelectorAll(".btn").forEach((b) => (b.disabled = on));
+      }
+
+      const steps = [
+        "Step 1/6: Scoring match with LLM...",
+        "Step 2/6: Analyzing gaps...",
+        "Step 3/6: Computing semantic similarity...",
+        "Step 4/6: Extracting ATS keywords...",
+        "Step 5/6: Generating resume suggestions...",
+        "Step 6/6: Running self-eval judge...",
+        "Compiling your report...",
+      ];
+      let stepIdx = 0,
+        stepTimer = null;
+
+      function startStepAnimation() {
+        stepIdx = 0;
+        document.getElementById("loaderStep").textContent = steps[0];
+        stepTimer = setInterval(() => {
+          stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+          document.getElementById("loaderStep").textContent = steps[stepIdx];
+        }, 3500);
+      }
+
+      function stopStepAnimation() {
+        clearInterval(stepTimer);
+      }
+
+      function scoreClass(n, max) {
+        const pct = (n / max) * 100;
+        if (pct >= 75) return "green";
+        if (pct >= 50) return "amber";
+        return "red";
+      }
+
+      function renderTags(containerId, items, cls) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = items.length
+          ? items.map((i) => `<span class="tag ${cls}">${i}</span>`).join("")
+          : '<span style="color:var(--muted);font-size:0.85rem">None identified.</span>';
+      }
+
+      function renderResults(data) {
+        const s = data.match_score;
+        const sem = data.semantic_similarity;
+        const ev = data.eval_report;
+
+        document.getElementById("llmScore").textContent = s.score;
+        document.getElementById("llmScore").className =
+          `number ${scoreClass(s.score, 100)}`;
+
+        document.getElementById("semScore").textContent = sem
+          ? `${sem.percentage}`
+          : "—";
+        if (sem)
+          document.getElementById("semScore").className =
+            `number ${scoreClass(sem.percentage, 100)}`;
+
+        document.getElementById("evalScore").textContent = ev
+          ? `${ev.overall_quality}`
+          : "—";
+
+        document.getElementById("reasoning").textContent = s.reasoning;
+        renderTags("strongMatches", s.strong_matches, "success");
+        renderTags("weakMatches", s.weak_matches, "warning");
+
+        // Score divergence banner
+        const banner = document.getElementById("divergenceBanner");
+        if (sem && s.score - sem.percentage >= 15) {
+          document.getElementById("divLlm").textContent = `${s.score}/100`;
+          document.getElementById("divSem").textContent =
+            `${sem.percentage}/100`;
+          banner.classList.add("active");
+        } else {
+          banner.classList.remove("active");
+        }
+
+        document.getElementById("semInterpretation").textContent = sem
+          ? `${sem.interpretation} (cosine score: ${sem.score})`
+          : "Not available.";
+
+        renderTags("missingSkills", data.gap_analysis.missing_skills, "danger");
+        renderTags(
+          "missingKeywords",
+          data.gap_analysis.missing_keywords,
+          "purple",
+        );
+        renderTags("priorityGaps", data.gap_analysis.priority_gaps, "dark");
+
+        // ATS Keywords
+        const ats = data.ats_keywords;
+        if (ats) {
+          document.getElementById("atsRewriteAdvice").textContent =
+            ats.rewrite_advice;
+          const banner = document.getElementById("atsGapBanner");
+          banner.style.display = ats.score_gap_detected ? "block" : "none";
+          const grid = document.getElementById("atsKeywordsList");
+          grid.innerHTML = ats.keywords
+            .map(
+              (k) => `
+        <div class="ats-keyword-card">
+          <div class="ats-keyword-top">
+            <span class="ats-keyword-name">${k.keyword}</span>
+            <span class="ats-priority ats-priority-${k.priority}">${k.priority}</span>
+          </div>
+          <div class="ats-where">Add to: ${k.where_to_add}</div>
+          <div class="ats-example">"${k.usage_example}"</div>
+        </div>`,
+            )
+            .join("");
+        }
+
+        document.getElementById("summaryAdvice").textContent =
+          data.resume_suggestions.summary_advice;
+
+        const evalMap = {};
+        if (ev)
+          ev.evaluations.forEach((e) => (evalMap[e.suggestion_index] = e));
+
+        const list = document.getElementById("suggestionsList");
+        list.innerHTML = data.resume_suggestions.suggestions
+          .map((s, i) => {
+            const e = evalMap[i];
+            const flag = e ? e.flag : "";
+            return `
+        <div class="suggestion ${flag}">
+          <div class="suggestion-header">
+            <span class="suggestion-section">${s.section}</span>
+            ${e ? `<span class="flag-badge flag-${flag}">${flag} · ${e.quality_score}/10</span>` : ""}
+          </div>
+          ${s.original ? `<div class="suggestion-original">Before: ${s.original}</div>` : ""}
+          <div class="suggestion-text">${s.suggestion}</div>
+          <div class="suggestion-reason">Why: ${s.reason}</div>
+        </div>`;
+          })
+          .join("");
+
+        document.getElementById("evalSummary").textContent = ev
+          ? ev.eval_summary
+          : "Self-eval not available.";
+
+        document.getElementById("results").classList.add("active");
+      }
+
+      async function analyzeText() {
+        const resumeText = document.getElementById("resumeText").value.trim();
+        const jobText = document.getElementById("jobText").value.trim();
+        if (!resumeText || !jobText) {
+          alert("Please fill in both fields.");
+          return;
+        }
+
+        lastRequest = { resumeText, jobText };
+        lastMode = "text";
+        setLoading(true);
+        startStepAnimation();
+
+        try {
+          const res = await fetch("/match", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              resume_text: resumeText,
+              job_description: jobText,
+            }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          renderResults(await res.json());
+        } catch (e) {
+          alert("Error: " + e.message);
+        } finally {
+          stopStepAnimation();
+          setLoading(false);
+        }
+      }
+
+      async function analyzePdf() {
+        const file = document.getElementById("resumePdf").files[0];
+        const jobText = document.getElementById("jobTextPdf").value.trim();
+        if (!file || !jobText) {
+          alert("Please upload a PDF and fill in the job description.");
+          return;
+        }
+
+        lastMode = "pdf";
+        setLoading(true);
+        startStepAnimation();
+
+        const form = new FormData();
+        form.append("resume_pdf", file);
+        form.append("job_description", jobText);
+
+        try {
+          const res = await fetch("/match/pdf-upload", {
+            method: "POST",
+            body: form,
+          });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          lastRequest = {
+            resumeText: "(from uploaded PDF)",
+            jobText,
+            pdfData: data,
+          };
+          renderResults(data);
+        } catch (e) {
+          alert("Error: " + e.message);
+        } finally {
+          stopStepAnimation();
+          setLoading(false);
+        }
+      }
+
+      document
+        .getElementById("downloadBtn")
+        .addEventListener("click", async () => {
+          if (!lastRequest) return;
+          const btn = document.getElementById("downloadBtn");
+          btn.textContent = "Generating PDF...";
+          btn.disabled = true;
+
+          try {
+            let res;
+            if (lastMode === "pdf" && lastRequest.pdfData) {
+              // Re-run with text extracted from pdf (already have result, just re-generate report)
+              res = await fetch("/match/report", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  resume_text: lastRequest.resumeText || "N/A",
+                  job_description: lastRequest.jobText,
+                }),
+              });
+            } else {
+              res = await fetch("/match/report", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  resume_text: lastRequest.resumeText,
+                  job_description: lastRequest.jobText,
+                }),
+              });
+            }
+
+            if (!res.ok) throw new Error(await res.text());
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "match_report.pdf";
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            alert("Error generating PDF: " + e.message);
+          } finally {
+            btn.textContent = "⬇ Download Full PDF Report";
+            btn.disabled = false;
+          }
+        });
+    </script>
+  </body>
+</html>
