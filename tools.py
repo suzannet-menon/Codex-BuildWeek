@@ -2,13 +2,13 @@
 
 import json
 import os
-from groq import Groq
+from openai import OpenAI
 from dotenv import load_dotenv
 from models import MatchScore, GapAnalysis, ResumeSuggestions, ATSKeywords, SemanticScore
 
 load_dotenv()
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL = "llama-3.3-70b-versatile"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+MODEL = "gpt-5.6-terra"
 
 
 def _call_groq(system_prompt: str, user_prompt: str) -> str:
@@ -19,7 +19,7 @@ def _call_groq(system_prompt: str, user_prompt: str) -> str:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=0.3,
+        
     )
     content = response.choices[0].message.content
     return content.strip() if content else ""

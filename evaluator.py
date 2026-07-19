@@ -1,14 +1,14 @@
 import json
 import os
-from groq import Groq
+from openai import OpenAI
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List
 from models import MatchResult
 
 load_dotenv()
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL = "llama-3.3-70b-versatile"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+MODEL = "gpt-5.6-terra"
 
 
 class SuggestionEval(BaseModel):
@@ -73,7 +73,7 @@ Return JSON in exactly this format:
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        temperature=0.1,
+        
     )
 
     choice = response.choices[0]

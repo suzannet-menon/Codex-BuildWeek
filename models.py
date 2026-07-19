@@ -47,6 +47,21 @@ class SemanticScore(BaseModel):
     interpretation: str
 
 
+# ATS Keywords 
+ 
+class ATSKeyword(BaseModel):
+    keyword: str
+    priority: str           # "high" | "medium" | "low"
+    where_to_add: str       # which resume section to add it to
+    usage_example: str      # example sentence using the keyword
+ 
+ 
+class ATSKeywords(BaseModel):
+    score_gap_detected: bool
+    keywords: List[ATSKeyword]
+    rewrite_advice: str     # concrete paragraph on vocabulary alignment
+
+
 # Eval Report 
 
 class SuggestionEval(BaseModel):
@@ -61,21 +76,6 @@ class EvalReport(BaseModel):
     overall_quality: float
     evaluations: List[SuggestionEval]
     eval_summary: str
-
-
-# ATS Keywords 
- 
-class ATSKeyword(BaseModel):
-    keyword: str
-    priority: str           # "high" | "medium" | "low"
-    where_to_add: str       # which resume section to add it to
-    usage_example: str      # example sentence using the keyword
- 
- 
-class ATSKeywords(BaseModel):
-    score_gap_detected: bool
-    keywords: List[ATSKeyword]
-    rewrite_advice: str     # concrete paragraph on vocabulary alignment
 
 
 # Response Model 
