@@ -656,6 +656,7 @@
     <script>
       let lastRequest = null;
       let lastMode = "text";
+      let lastResult = null; // Stores the computed result for PDF generation.
 
       function switchTab(tab) {
         document
@@ -842,7 +843,8 @@
             }),
           });
           if (!res.ok) throw new Error(await res.text());
-          renderResults(await res.json());
+          lastResult = await res.json();
+          renderResults(lastResult);
         } catch (e) {
           alert("Error: " + e.message);
         } finally {
@@ -874,6 +876,7 @@
           });
           if (!res.ok) throw new Error(await res.text());
           const data = await res.json();
+          lastResult = data;
           lastRequest = {
             resumeText: "(from uploaded PDF)",
             jobText,
@@ -891,33 +894,19 @@
       document
         .getElementById("downloadBtn")
         .addEventListener("click", async () => {
-          if (!lastRequest) return;
+          if (!lastResult) return;
           const btn = document.getElementById("downloadBtn");
           btn.textContent = "Generating PDF...";
           btn.disabled = true;
 
           try {
-            let res;
-            if (lastMode === "pdf" && lastRequest.pdfData) {
-              // Re-run with text extracted from pdf (already have result, just re-generate report)
-              res = await fetch("/match/report", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  resume_text: lastRequest.resumeText || "N/A",
-                  job_description: lastRequest.jobText,
-                }),
-              });
-            } else {
-              res = await fetch("/match/report", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  resume_text: lastRequest.resumeText,
-                  job_description: lastRequest.jobText,
-                }),
-              });
-            }
+            // Generate the report from the result already shown to the user.
+            // This avoids re-running the agent and its API calls.
+            const res = await fetch("/report-from-result", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(lastResult),
+            });
 
             if (!res.ok) throw new Error(await res.text());
             const blob = await res.blob();

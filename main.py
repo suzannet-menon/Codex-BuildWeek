@@ -76,6 +76,20 @@ def match_and_download(request: MatchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/report-from-result")
+def download_report_from_result(result: MatchResult):
+    """Create a PDF from an existing match result without re-running the agent."""
+    try:
+        pdf_bytes = generate_pdf_report(result)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=match_report.pdf"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/match/report-pdf-upload")
 async def match_pdf_and_download(
     resume_pdf: UploadFile = File(...),
