@@ -2,17 +2,16 @@
 
 import json
 import os
-from groq import Groq
+from openai import OpenAI
 from dotenv import load_dotenv
 from models import MatchScore, GapAnalysis, ResumeSuggestions, ATSKeywords, SemanticScore
 
 load_dotenv()
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL = "llama-3.3-70b-versatile"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+MODEL = "gpt-4.1-mini"
 
-def _call_groq(system_prompt: str, user_prompt: str) -> str:
-    """Base Groq call - returns raw text content."""
+def _call_openai(system_prompt: str, user_prompt: str) -> str:
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
@@ -21,6 +20,7 @@ def _call_groq(system_prompt: str, user_prompt: str) -> str:
         ],
         temperature=0.3,
     )
+
     content = response.choices[0].message.content
     return content.strip() if content else ""
 
@@ -52,7 +52,7 @@ Return JSON in exactly this format:
   "weak_matches": ["<skill or experience that partially matches>", ...]
 }}"""
 
-    raw = _call_groq(system, user)
+    raw = _call_openai(system, user)
     data = _parse_json(raw)
     return MatchScore(**data)
 
@@ -85,7 +85,7 @@ Return JSON in exactly this format:
   "priority_gaps": ["<top 3 most critical gaps to fix first>", ...]
 }}"""
 
-    raw = _call_groq(system, user)
+    raw = _call_openai(system, user)
     data = _parse_json(raw)
     return GapAnalysis(**data)
 
@@ -121,7 +121,7 @@ Return JSON in exactly this format:
   "summary_advice": "<2-3 sentences of overall strategic advice for this application>"
 }}"""
 
-    raw = _call_groq(system, user)
+    raw = _call_openai(system, user)
     data = _parse_json(raw)
     return ResumeSuggestions(**data)
 
@@ -179,6 +179,6 @@ Return JSON in exactly this format:
 
 Return 8-12 keywords total. Prioritise exact phrases over single words where possible."""
 
-    raw = _call_groq(system, user)
+    raw = _call_openai(system, user)
     data = _parse_json(raw)
     return ATSKeywords(**data)
