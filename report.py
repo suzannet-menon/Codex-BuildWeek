@@ -14,7 +14,7 @@ from models import MatchResult, InterviewQuestions
 
 # ── Color palette ─────────────────────────────────────────────────────────────
 DARK       = colors.HexColor("#000000")
-ACCENT     = colors.HexColor("#8D8FF2")   # indigo
+ACCENT     = colors.HexColor("#4b8396")   # teal
 SUCCESS    = colors.HexColor("#10B981")   # emerald
 WARNING    = colors.HexColor("#F59E0B")   # amber
 DANGER     = colors.HexColor("#F17070")   # red
@@ -187,13 +187,22 @@ def generate_pdf_report(result: MatchResult) -> bytes:
             while len(row) < COLS:
                 row.append("")
 
-        cell_width = 1.3 * inch
+        available_width = doc.width
+        cell_width = available_width / COLS
+
         table_data = [
-            [Paragraph(cell, tag_style) if cell else Paragraph("", tag_style) for cell in row]
+            [
+                Paragraph(cell, tag_style) if cell else Paragraph("", tag_style)
+                for cell in row
+            ]
             for row in rows
         ]
 
-        t = Table(table_data, colWidths=[cell_width] * COLS, hAlign="LEFT")
+        t = Table(
+            table_data,
+            colWidths=[cell_width] * COLS,
+            hAlign="LEFT",
+        )
         t.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), bg_color),
             ("TEXTCOLOR", (0, 0), (-1, -1), WHITE),
@@ -238,7 +247,10 @@ def generate_pdf_report(result: MatchResult) -> bytes:
         ],
     ]
 
-    score_table = Table(score_data, colWidths=[2.2 * inch, 2.2 * inch, 2.2 * inch])
+    score_table = Table(
+    score_data,
+    colWidths=[doc.width / 3] * 3,
+    )
     score_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), LIGHT_BG),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -316,7 +328,10 @@ def generate_pdf_report(result: MatchResult) -> bytes:
             Paragraph(f"<b>{s.section}</b>", body_style),
             Paragraph(f"<font color='{_hex(flag_color)}'>● {flag.upper()}</font>{quality}", muted_style),
         ]
-        header_table = Table([header], colWidths=[3.5 * inch, 3 * inch])
+        header_table = Table(
+        [header],
+        colWidths=[doc.width * 0.65, doc.width * 0.35],
+)
         header_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
 
         rows = [
@@ -333,9 +348,10 @@ def generate_pdf_report(result: MatchResult) -> bytes:
             story.append(Paragraph(f"<b>Before:</b> {s.original}", muted_style))
 
         formatted_suggestion = (
-            s.suggestion
-                .replace(" l ", "<br/>• ")
-                .replace("|", "<br/>• ")
+        s.suggestion
+            .replace(" l ", "<br/>• ")
+            .replace(" • ", "<br/>• ")
+            .replace("|", "<br/>• ")
         )
 
         story.append(
@@ -344,7 +360,7 @@ def generate_pdf_report(result: MatchResult) -> bytes:
                 body_style,
             )
         )
-        
+
         story.append(Paragraph(f"<b>Why:</b> {s.reason}", muted_style))
 
         story.append(Spacer(1, 12))
@@ -380,10 +396,6 @@ def generate_pdf_report(result: MatchResult) -> bytes:
             for idx, qa in enumerate(qa_list, 1):
                 q_para = Paragraph(f"Q{idx}. {qa.question}", q_style)
                 a_para = Paragraph(f"A: {qa.answer}", a_style)
-                d = Table(
-                    [[q_para], [a_para]],
-                    colWidths=[6.5 * inch],
-                )
                 story.append(q_para)
                 story.append(a_para)
                 story.append(Spacer(1, 10))

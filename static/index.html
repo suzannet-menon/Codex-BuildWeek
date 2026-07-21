@@ -565,11 +565,43 @@
         }
       }
 
-      @media (max-width: 600px) {
-        .score-grid {
-          grid-template-columns: 1fr 1fr;
+        @media (max-width: 600px) {
+            .score-grid {
+              grid-template-columns: 1fr 1fr;
+            }
         }
-      }
+
+        @media (max-width:768px){
+
+        .app-header{
+            flex-direction:column;
+            height:auto;
+            padding:15px;
+        }
+
+        nav{
+            margin-top:12px;
+            flex-wrap:wrap;
+            justify-content:center;
+            gap:15px;
+        }
+
+        .hero h1{
+            font-size:2rem;
+        }
+
+        .hero p{
+            font-size:0.95rem;
+        }
+
+        .container{
+            width:96%;
+        }
+
+        .card{
+            padding:20px;
+        }
+    }
     </style>
   </head>
   <body>
