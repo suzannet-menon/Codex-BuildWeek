@@ -77,20 +77,20 @@ Given a **resume** (pasted text or PDF upload) and a **job description**, the sy
 Codex-BuildWeek/
 ├── static/
 │   └── index.html        # Frontend — resume input, JD input, results display, PDF buttons
-├── agent.py               # Orchestration — runs the pipeline of tools in sequence
-├── tools.py                # Individual LLM-backed tools (scoring, gap analysis, suggestions, etc.)
-├── models.py                # Data models — MatchResult and related structured schemas
-├── embeddings.py             # Semantic similarity via embeddings + cosine similarity
-├── evaluator.py                # Self-eval / judge pass — grades suggestion quality
-├── report.py                    # PDF report generation — layout, section ordering, header/footer
-├── interview.py              # Generates interview questions and sample answers
-├── utils.py                      # Shared helpers (e.g. resume text extraction)
-├── main.py                        # FastAPI app entrypoint and API routes
-├── requirements.txt                # Python dependencies
-├── runtime.txt                      # Python runtime version pin
-├── .python-version                   # Local Python version pin
-├── .gitignore                         # Excludes .env, caches, IDE files, logs
-└── README.md                           # You are here
+├── agent.py              # Orchestration — runs the pipeline of tools in sequence
+├── tools.py              # Individual LLM-backed tools (scoring, gap analysis, suggestions, etc.)
+├── models.py             # Data models — MatchResult and related structured schemas
+├── embeddings.py         # Semantic similarity via embeddings + cosine similarity
+├── evaluator.py          # Self-eval / judge pass — grades suggestion quality
+├── report.py             # PDF report generation — layout, section ordering, header/footer
+├── interview.py          # Generates interview questions and sample answers
+├── utils.py              # Shared helpers (e.g. resume text extraction)
+├── main.py               # FastAPI app entrypoint and API routes
+├── requirements.txt      # Python dependencies
+├── runtime.txt           # Python runtime version pin
+├── .python-version       # Local Python version pin
+├── .gitignore            # Excludes .env, caches, IDE files, logs
+└── README.md             # You are here
 ```
 
 ---
@@ -126,8 +126,8 @@ git clone https://github.com/suzannet-menon/Codex-BuildWeek.git
 cd Codex-BuildWeek
 pip install -r requirements.txt
 
-> **Recommended:** Python 3.11
-> **Note:** Python 3.14 is currently not fully supported by `sentence-transformers` on most deployment platforms.
+> Recommended: Python 3.11
+> Note: Python 3.14 is currently not fully supported by `sentence-transformers` on most deployment platforms.
 ```
 
 ### 2. Add your environment variables
@@ -265,7 +265,7 @@ This project can be deployed on Render.
 Vercel currently has limitations for FastAPI applications using sentence-transformers because the model must be downloaded during deployment and exceeds the serverless function constraints.
 
 If deploying on Vercel, consider disabling semantic similarity or replacing it with an API-based embedding provider.
----
+--
 
 ## API endpoints (high level)
 
