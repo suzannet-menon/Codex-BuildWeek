@@ -4,7 +4,14 @@ import json
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from models import MatchScore, GapAnalysis, ResumeSuggestions, ATSKeywords, SemanticScore
+from models import (
+    MatchScore,
+    GapAnalysis,
+    ResumeSuggestions,
+    ATSKeywords,
+    SemanticScore,
+    InterviewQuestions,
+)
 
 load_dotenv()
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -182,3 +189,53 @@ Return 8-12 keywords total. Prioritise exact phrases over single words where pos
     raw = _call_openai(system, user)
     data = _parse_json(raw)
     return ATSKeywords(**data)
+
+def generate_interview_questions(
+    resume_text: str,
+    job_description: str,
+) -> InterviewQuestions:
+
+    system = """
+You are an experienced technical interviewer.
+
+Generate interview questions based on BOTH the resume and the job description.
+
+Return ONLY valid JSON.
+"""
+
+    user = f"""
+Resume:
+{resume_text}
+
+Job Description:
+{job_description}
+
+Return JSON exactly like this:
+
+{{
+  "skill_questions":[
+    {{
+      "question":"...",
+      "answer":"..."
+    }}
+  ],
+  "project_questions":[
+    {{
+      "question":"...",
+      "answer":"..."
+    }}
+  ]
+}}
+
+Generate:
+
+- 5 skill questions
+- 5 project questions
+
+Answers should be concise model answers.
+"""
+
+    raw = _call_openai(system, user)
+    data = _parse_json(raw)
+
+    return InterviewQuestions(**data)

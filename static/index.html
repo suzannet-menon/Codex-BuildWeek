@@ -18,8 +18,8 @@
         --surface: #1e293b;
         --surface2: #273449;
         --border: #334155;
-        --accent: #6366f1;
-        --accent-light: #818cf8;
+        --accent: #4b8396;
+        --accent-light: #f9f9f9;
         --success: #10b981;
         --warning: #f59e0b;
         --danger: #ef4444;
@@ -29,16 +29,84 @@
       }
 
       body {
-        font-family: "Inter", system-ui, sans-serif;
+        font-family: "Calibri", system-ui, sans-serif;
         background: var(--bg);
         color: var(--text);
         min-height: 100vh;
-        padding: 32px 16px;
+        padding: 20px 10px;
+      }
+
+      .app-header{
+          width:100%;
+          height:72px;
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+
+          padding:0 25px;
+
+          background:#111827;
+
+          border-bottom:1px solid var(--border);
+
+          position:sticky;
+          top:0;
+          z-index:100;
+      }
+
+      .logo{
+          font-size:1.5rem;
+          font-weight:700;
+          letter-spacing:.5px;
+      }
+
+      .logo span{
+          color:var(--accent-light);
+      }
+
+      nav{
+          display:flex;
+          gap:30px;
+      }
+
+      nav a{
+          text-decoration:none;
+          color:var(--muted);
+          font-size:.95rem;
+          transition:.25s;
+      }
+
+      nav a:hover{
+          color:white;
+      }
+
+      .hero{
+          text-align:center;
+          padding:25px 20px 35px;
+      }
+
+      .hero h1{
+          font-size:2.7rem;
+          margin-bottom:15px;
+      }
+
+      .hero p{
+          max-width:760px;
+          margin:auto;
+          line-height:1.8;
+          color:var(--muted);
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
       }
 
       .container {
-        max-width: 860px;
-        margin: 0 auto;
+          width:min(1400px,95%);
+          margin:auto;
+          flex:1;
       }
 
       /* Header */
@@ -48,7 +116,7 @@
       }
       header h1 {
         font-size: 2rem;
-        font-weight: 700;
+        font-weight: 650;
         letter-spacing: -0.5px;
       }
       header h1 span {
@@ -59,6 +127,22 @@
         margin-top: 8px;
         font-size: 0.95rem;
       }
+
+    footer {
+    width: 100%;
+    margin-top: 50px;
+    padding: 22px 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-top: 1px solid var(--border);
+
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+    }
 
       /* Pipeline badges */
       .pipeline {
@@ -201,14 +285,14 @@
       .score-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-bottom: 24px;
+        gap: 19px;
+        margin-bottom: 30px;
       }
       .score-card {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: 20px;
+        padding: 30px;
         text-align: center;
       }
       .score-card .label {
@@ -490,21 +574,20 @@
   </head>
   <body>
     <div class="container">
-      <header>
-        <h1>AI Resume <span>+</span> Job Match Agent</h1>
-        <p>
-          Agentic analysis — score, gaps, ATS keywords, suggestions, embeddings,
-          and self-eval
-        </p>
-        <div class="pipeline">
-          <span class="badge">① LLM Match Score</span>
-          <span class="badge">② Gap Analysis</span>
-          <span class="badge">③ Suggestions</span>
-          <span class="badge">④ Semantic Embeddings</span>
-          <span class="badge">⑤ ATS Keywords</span>
-          <span class="badge">⑥ Self-Eval Judge</span>
-        </div>
-      </header>
+      <header class="app-header">
+          <div class="logo">
+            ResumePilot
+          </div>
+
+        </header>
+
+        <section class="hero">
+          <h1>AI Resume and Candidate Evaluation Engine</h1>
+
+          <p>
+            Compare resumes against job descriptions using LLM reasoning, semantic embeddings, ATS keyword analysis and resume improvement suggestions.
+          </p>
+      </section>
 
       <!-- Input form -->
       <div class="card" id="formCard">
@@ -913,7 +996,8 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "match_report.pdf";
+            const today = new Date().toISOString().split("T")[0];
+            a.download = `ResumePilot_Report_${today}.pdf`;            
             a.click();
             URL.revokeObjectURL(url);
           } catch (e) {
@@ -924,5 +1008,8 @@
           }
         });
     </script>
+    <footer>
+      © 2026 ResumePilot. All Rights Reserved.
+    </footer>
   </body>
 </html>

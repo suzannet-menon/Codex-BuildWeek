@@ -77,6 +77,14 @@ class ATSKeywords(BaseModel):
     keywords: List[ATSKeyword]
     rewrite_advice: str     # concrete paragraph on vocabulary alignment
 
+class InterviewQA(BaseModel):
+    question: str
+    answer: str
+
+
+class InterviewQuestions(BaseModel):
+    skill_questions: List[InterviewQA]
+    project_questions: List[InterviewQA]
 
 # Response Model 
 
@@ -86,4 +94,5 @@ class MatchResult(BaseModel):
     resume_suggestions: ResumeSuggestions
     semantic_similarity: Optional[SemanticScore] = None
     ats_keywords: Optional[ATSKeywords] = None
+    interview_questions: Optional[InterviewQuestions] = None
     eval_report: Optional[EvalReport] = None

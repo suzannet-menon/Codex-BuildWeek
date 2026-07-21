@@ -73,10 +73,10 @@ def generate_pdf_report(result: MatchResult) -> bytes:
     doc = SimpleDocTemplate(
         buffer,
         pagesize=letter,
-        leftMargin=0.45 * inch,
-        rightMargin=0.45 * inch,
-        topMargin=1.10 * inch,   # extra room for header
-        bottomMargin=0.65 * inch, # extra room for footer
+        leftMargin=0.35 * inch,
+        rightMargin=0.35 * inch,
+        topMargin=0.95 * inch,   # extra room for header
+        bottomMargin=0.60 * inch, # extra room for footer
     )
 
     base = getSampleStyleSheet()
@@ -149,7 +149,7 @@ def generate_pdf_report(result: MatchResult) -> bytes:
         canvas.drawString(H_MARGIN, PAGE_H - 0.50 * inch, candidate_name)
         # Center: report title
         canvas.setFont("Helvetica", 9)
-        title_text = "AI Resume and Job Match Report"
+        title_text = "AI Resume and Candidate Evaluation Engine"
         canvas.drawCentredString(PAGE_W / 2, PAGE_H - 0.50 * inch, title_text)
         # Right: target job title (if available)
         canvas.drawRightString(PAGE_W - H_MARGIN, PAGE_H - 0.50 * inch,
@@ -219,7 +219,7 @@ def generate_pdf_report(result: MatchResult) -> bytes:
         target_job = ", ".join(hints) if hints else ""
 
     # ── Page body header (first page title) ──────────────────────────────────
-    story.append(Paragraph("AI Resume and Job Match Report", title_style))
+    story.append(Paragraph("AI Resume and Candidate Evaluation Engine", title_style))
 
     # Score summary row 
     llm_score = result.match_score.score
@@ -327,16 +327,28 @@ def generate_pdf_report(result: MatchResult) -> bytes:
         ]
         rows = [r for r in rows if r]
 
-        card = Table(rows, colWidths=[6.5 * inch])
-        card.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), LIGHT_BG),
-            ("LEFTPADDING", (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ("TOPPADDING", (0, 0), (-1, -1), 8),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-            ("LINEAFTER", (0, 0), (0, -1), 3, flag_color),
-        ]))
-        story.append(KeepTogether([card, Spacer(1, 8)]))
+        story.append(header_table)
+
+        if s.original:
+            story.append(Paragraph(f"<b>Before:</b> {s.original}", muted_style))
+
+        formatted_suggestion = (
+            s.suggestion
+                .replace(" l ", "<br/>• ")
+                .replace("|", "<br/>• ")
+        )
+
+        story.append(
+            Paragraph(
+                f"<b>Suggestion:</b><br/>• {formatted_suggestion}",
+                body_style,
+            )
+        )
+        
+        story.append(Paragraph(f"<b>Why:</b> {s.reason}", muted_style))
+
+        story.append(Spacer(1, 12))
+        story.append(divider())
 
     # Interview Questions (before Self-Eval Summary)
     if result.interview_questions:
@@ -368,19 +380,14 @@ def generate_pdf_report(result: MatchResult) -> bytes:
             for idx, qa in enumerate(qa_list, 1):
                 q_para = Paragraph(f"Q{idx}. {qa.question}", q_style)
                 a_para = Paragraph(f"A: {qa.answer}", a_style)
-                card = Table(
+                d = Table(
                     [[q_para], [a_para]],
                     colWidths=[6.5 * inch],
                 )
-                card.setStyle(TableStyle([
-                    ("BACKGROUND", (0, 0), (-1, -1), LIGHT_BG),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 12),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-                    ("TOPPADDING", (0, 0), (-1, -1), 8),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-                    ("LINEAFTER", (0, 0), (0, -1), 3, ACCENT),
-                ]))
-                story.append(KeepTogether([card, Spacer(1, 8)]))
+                story.append(q_para)
+                story.append(a_para)
+                story.append(Spacer(1, 10))
+                story.append(divider())
 
         _render_qa_block("Interview Questions — Skills & Keywords", iq.skill_questions)
         _render_qa_block("Interview Questions — Projects", iq.project_questions)
@@ -408,6 +415,3 @@ def generate_pdf_report(result: MatchResult) -> bytes:
 
     doc.build(story, onFirstPage=_draw_header_footer, onLaterPages=_draw_header_footer)
     return buffer.getvalue()
-Pressing key...Clicking...Stopping...
-
-Stop Agent
