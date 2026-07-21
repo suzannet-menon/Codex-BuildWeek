@@ -8,7 +8,7 @@ Built during **OpenAI Build Week — Cafe Codex, Pune**.
 
 ## What this project does
 
-JobMatch AI is an end-to-end job-application assistant for students, early-career candidates, and job seekers applying to multiple roles. It doesn't just tell you *whether* your resume matches a job — it tells you *why*, *what's missing*, and *exactly how to fix it*, then backs that up with a self-graded quality check so the advice isn't just generic filler.
+ResumePilot is an end-to-end job-application assistant for students, early-career candidates, and job seekers applying to multiple roles. It doesn't just tell you *whether* your resume matches a job — it tells you *why*, *what's missing*, and *exactly how to fix it*, then backs that up with a self-graded quality check so the advice isn't just generic filler.
 
 Given a **resume** (pasted text or PDF upload) and a **job description**, the system produces:
 
