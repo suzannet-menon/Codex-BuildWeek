@@ -72,7 +72,6 @@ Return JSON in exactly this format:
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        temperature=0.1,
     )
 
     choice = response.choices[0]

@@ -25,7 +25,6 @@ def _call_openai(system_prompt: str, user_prompt: str) -> str:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=0.3,
     )
 
     content = response.choices[0].message.content
