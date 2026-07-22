@@ -195,7 +195,7 @@ This allows the project to work with either OpenAI or Grok without changing the 
 Replace:
 
 ```python
-MODEL = "gpt-4.1-mini"
+MODEL = "gpt-5.6"
 ```
 
 with the Grok model you wish to use, for example:

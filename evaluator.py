@@ -8,7 +8,7 @@ from models import MatchResult
 
 load_dotenv()
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-MODEL = "gpt-4.1-mini"
+MODEL = "gpt-5.6"
 
 class SuggestionEval(BaseModel):
     suggestion_index: int
