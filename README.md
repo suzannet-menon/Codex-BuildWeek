@@ -260,7 +260,7 @@ The app will be available at `http://localhost:8000`.
 
 ## Deployment Notes
 
-This project can be deployed on Render.
+This project can be deployed on Railway OR Render.
 
 Vercel currently has limitations for FastAPI applications using sentence-transformers because the model must be downloaded during deployment and exceeds the serverless function constraints.
 
