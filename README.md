@@ -278,12 +278,9 @@ If deploying on Vercel, consider disabling semantic similarity or replacing it w
 
 ---
 
-## Design principles
+## How did Codex and GPT 5.6 help us ?
 
-- **Evidence-first, not embellishment-first.** Every suggestion is meant to help the user describe *real* experience more effectively — not fabricate skills they don't have.
-- **Two independent signals, not one.** The LLM match score and the embedding-based semantic similarity score are deliberately kept separate, since they measure different things (conceptual fit vs. literal keyword/language overlap). When they disagree, that's a signal worth reading, not a bug.
-- **Self-graded output.** Suggestions are passed through a second evaluation step so the report includes a visible confidence/quality signal rather than presenting AI output as unquestionable.
-- **Short, human interview answers.** Interview prep answers are capped at 2–4 sentences — spoken-length, not essay-length — so they're actually usable as practice material rather than something to memorize verbatim.
+Codex was central to building ResumePilot end to end. It helped scaffold the FastAPI backend and structured the agentic pipeline across scoring, gap analysis, and suggestion generation; debug and fix the PDF report generation logic (including a color-rendering bug that was breaking every export). GPT-5.6 powers the reasoning layer throughout for match scoring, gap analysis, ATS keyword extraction, resume rewrite suggestions, interview question generation, and the self-eval judge that grades suggestion quality before it reaches the user.
 
 ## Known limitations / next steps
 
