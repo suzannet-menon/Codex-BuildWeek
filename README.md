@@ -8,7 +8,7 @@ Built during **OpenAI Build Week — Cafe Codex, Pune**.
 
 ## What this project does
 
-JobMatch AI is an end-to-end job-application assistant for students, early-career candidates, and job seekers applying to multiple roles. It doesn't just tell you *whether* your resume matches a job — it tells you *why*, *what's missing*, and *exactly how to fix it*, then backs that up with a self-graded quality check so the advice isn't just generic filler.
+ResumePilot is an end-to-end job-application assistant for students, early-career candidates, and job seekers applying to multiple roles. It doesn't just tell you *whether* your resume matches a job — it tells you *why*, *what's missing*, and *exactly how to fix it*, then backs that up with a self-graded quality check so the advice isn't just generic filler.
 
 Given a **resume** (pasted text or PDF upload) and a **job description**, the system produces:
 
@@ -77,20 +77,20 @@ Given a **resume** (pasted text or PDF upload) and a **job description**, the sy
 Codex-BuildWeek/
 ├── static/
 │   └── index.html        # Frontend — resume input, JD input, results display, PDF buttons
-├── agent.py               # Orchestration — runs the pipeline of tools in sequence
-├── tools.py                # Individual LLM-backed tools (scoring, gap analysis, suggestions, etc.)
-├── models.py                # Data models — MatchResult and related structured schemas
-├── embeddings.py             # Semantic similarity via embeddings + cosine similarity
-├── evaluator.py                # Self-eval / judge pass — grades suggestion quality
-├── report.py                    # PDF report generation — layout, section ordering, header/footer
-├── interview.py              # Generates interview questions and sample answers
-├── utils.py                      # Shared helpers (e.g. resume text extraction)
-├── main.py                        # FastAPI app entrypoint and API routes
-├── requirements.txt                # Python dependencies
-├── runtime.txt                      # Python runtime version pin
-├── .python-version                   # Local Python version pin
-├── .gitignore                         # Excludes .env, caches, IDE files, logs
-└── README.md                           # You are here
+├── agent.py              # Orchestration — runs the pipeline of tools in sequence
+├── tools.py              # Individual LLM-backed tools (scoring, gap analysis, suggestions, etc.)
+├── models.py             # Data models — MatchResult and related structured schemas
+├── embeddings.py         # Semantic similarity via embeddings + cosine similarity
+├── evaluator.py          # Self-eval / judge pass — grades suggestion quality
+├── report.py             # PDF report generation — layout, section ordering, header/footer
+├── interview.py          # Generates interview questions and sample answers
+├── utils.py              # Shared helpers (e.g. resume text extraction)
+├── main.py               # FastAPI app entrypoint and API routes
+├── requirements.txt      # Python dependencies
+├── runtime.txt           # Python runtime version pin
+├── .python-version       # Local Python version pin
+├── .gitignore            # Excludes .env, caches, IDE files, logs
+└── README.md             # You are here
 ```
 
 ---
@@ -126,8 +126,8 @@ git clone https://github.com/suzannet-menon/Codex-BuildWeek.git
 cd Codex-BuildWeek
 pip install -r requirements.txt
 
-> **Recommended:** Python 3.11
-> **Note:** Python 3.14 is currently not fully supported by `sentence-transformers` on most deployment platforms.
+> Recommended: Python 3.11
+> Note: Python 3.14 is currently not fully supported by `sentence-transformers` on most deployment platforms.
 ```
 
 ### 2. Add your environment variables
@@ -265,7 +265,7 @@ This project can be deployed on Render.
 Vercel currently has limitations for FastAPI applications using sentence-transformers because the model must be downloaded during deployment and exceeds the serverless function constraints.
 
 If deploying on Vercel, consider disabling semantic similarity or replacing it with an API-based embedding provider.
----
+--
 
 ## API endpoints (high level)
 
@@ -278,12 +278,9 @@ If deploying on Vercel, consider disabling semantic similarity or replacing it w
 
 ---
 
-## Design principles
+## How did Codex and GPT 5.6 help us ?
 
-- **Evidence-first, not embellishment-first.** Every suggestion is meant to help the user describe *real* experience more effectively — not fabricate skills they don't have.
-- **Two independent signals, not one.** The LLM match score and the embedding-based semantic similarity score are deliberately kept separate, since they measure different things (conceptual fit vs. literal keyword/language overlap). When they disagree, that's a signal worth reading, not a bug.
-- **Self-graded output.** Suggestions are passed through a second evaluation step so the report includes a visible confidence/quality signal rather than presenting AI output as unquestionable.
-- **Short, human interview answers.** Interview prep answers are capped at 2–4 sentences — spoken-length, not essay-length — so they're actually usable as practice material rather than something to memorize verbatim.
+Codex was central to building ResumePilot end to end. It helped scaffold the FastAPI backend and structured the agentic pipeline across scoring, gap analysis, and suggestion generation; debug and fix the PDF report generation logic (including a color-rendering bug that was breaking every export). GPT-5.6 powers the reasoning layer throughout for match scoring, gap analysis, ATS keyword extraction, resume rewrite suggestions, interview question generation, and the self-eval judge that grades suggestion quality before it reaches the user.
 
 ## Known limitations / next steps
 
